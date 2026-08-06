@@ -4,10 +4,11 @@ use App\Livewire\HouseholdPlan;
 use App\Models\Task;
 use App\Models\User;
 use App\Support\TaskBucket;
+use Database\Seeders\HouseholdPlanSeeder;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->seed(\Database\Seeders\HouseholdPlanSeeder::class);
+    $this->seed(HouseholdPlanSeeder::class);
 });
 
 test('guests are redirected from the plan page', function () {
@@ -180,7 +181,7 @@ test('task assignment persists across remount and reseeding', function () {
     expect($task->fresh()->assigned_to)->toBe($katja->id);
 
     // Simulacija ponovnega seeda — assignee mora ostati.
-    $this->seed(\Database\Seeders\HouseholdPlanSeeder::class);
+    $this->seed(HouseholdPlanSeeder::class);
 
     expect($task->fresh()->assigned_to)->toBe($katja->id);
 
