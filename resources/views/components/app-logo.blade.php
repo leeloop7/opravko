@@ -2,16 +2,21 @@
     'sidebar' => false,
 ])
 
-@if($sidebar)
-    <flux:sidebar.brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-        </x-slot>
-    </flux:sidebar.brand>
+@if ($sidebar)
+    <a
+        href="{{ route('plan') }}"
+        wire:navigate
+        {{ $attributes->except('href')->class('flex items-center gap-2.5 rounded-lg outline-none') }}
+    >
+        <x-app-logo-icon class="size-7" />
+        <x-opravko-wordmark size="xs" />
+    </a>
 @else
-    <flux:brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-        </x-slot>
-    </flux:brand>
+    <a
+        href="{{ route('home') }}"
+        wire:navigate
+        {{ $attributes->except('href')->class('inline-flex items-center outline-none') }}
+    >
+        <x-opravko-wordmark size="md" />
+    </a>
 @endif

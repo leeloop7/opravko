@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $task_group_id
  * @property string $title
+ * @property Carbon|null $due_date
  * @property string $slug
  * @property int|null $assigned_to
  * @property int|null $created_by
@@ -24,6 +25,7 @@ class Task extends Model
     protected $fillable = [
         'task_group_id',
         'title',
+        'due_date',
         'slug',
         'assigned_to',
         'created_by',
@@ -35,6 +37,7 @@ class Task extends Model
     protected function casts(): array
     {
         return [
+            'due_date' => 'date',
             'completed_at' => 'datetime',
         ];
     }
@@ -79,6 +82,8 @@ class Task extends Model
         $this->forceFill([
             'completed_at' => now(),
             'completed_by' => $user->id,
+            // Če ni bilo assigneeja, postane zaključnik tudi izvajalec.
+            'assigned_to' => $this->assigned_to ?? $user->id,
         ])->save();
     }
 
@@ -90,5 +95,36 @@ class Task extends Model
         ])->save();
 
         $this->ratings()->delete();
+    }
+
+    /**
+     * Koga lahko oceni $rater:
+     * - zaključnik oceni assigneeja, če je bil izvajalec kdo drug
+     * - partner oceni tistega, ki je nalogo zaključil
+     */
+    public function rateeFor(User $rater): ?User
+    {
+        if (! $this->isCompleted()) {
+            return null;
+        }
+
+        if (
+            $this->completed_by === $rater->id
+            && $this->assigned_to
+            && $this->assigned_to !== $rater->id
+        ) {
+            return $this->assignee;
+        }
+
+        if ($this->completed_by && $this->completed_by !== $rater->id) {
+            return $this->completer;
+        }
+
+        return null;
+    }
+
+    public function canBeRatedBy(User $user): bool
+    {
+        return $this->rateeFor($user) !== null;
     }
 }
