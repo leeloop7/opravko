@@ -42,31 +42,37 @@ class Task extends Model
         ];
     }
 
+    /** @return BelongsTo<TaskGroup, $this> */
     public function group(): BelongsTo
     {
         return $this->belongsTo(TaskGroup::class, 'task_group_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function completer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'completed_by');
     }
 
+    /** @return HasMany<Rating, $this> */
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
     }
 
+    /** @return HasOne<Rating, $this> */
     public function ratingBy(User $user): HasOne
     {
         return $this->hasOne(Rating::class)->where('rater_id', $user->id);

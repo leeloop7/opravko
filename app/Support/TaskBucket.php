@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 class TaskBucket
 {
     /**
+     * @param  Collection<int, Task>  $tasks
      * @return list<array{key: string, title: string, tone: string, tasks: Collection<int, Task>}>
      */
     public static function group(Collection $tasks, ?CarbonInterface $now = null): array
@@ -19,41 +20,54 @@ class TaskBucket
         $endNextWeek = $startNextWeek->copy()->endOfWeek(CarbonInterface::SUNDAY)->startOfDay();
         $endOfMonth = $now->copy()->endOfMonth()->startOfDay();
 
-        $buckets = [
-            'overdue' => ['title' => 'Zamujeno', 'tone' => 'overdue', 'tasks' => collect()],
-            'this_week' => ['title' => 'Ta teden', 'tone' => 'september', 'tasks' => collect()],
-            'next_week' => ['title' => 'Naslednji teden', 'tone' => 'august', 'tasks' => collect()],
-            'this_month' => ['title' => 'Ta mesec', 'tone' => 'december', 'tasks' => collect()],
-            'later' => ['title' => 'Kasneje', 'tone' => 'later', 'tasks' => collect()],
-            'none' => ['title' => 'Brez roka', 'tone' => 'none', 'tasks' => collect()],
+        $meta = [
+            'overdue' => ['title' => 'Zamujeno', 'tone' => 'overdue'],
+            'this_week' => ['title' => 'Ta teden', 'tone' => 'september'],
+            'next_week' => ['title' => 'Naslednji teden', 'tone' => 'august'],
+            'this_month' => ['title' => 'Ta mesec', 'tone' => 'december'],
+            'later' => ['title' => 'Kasneje', 'tone' => 'later'],
+            'none' => ['title' => 'Brez roka', 'tone' => 'none'],
+        ];
+
+        $bucketTasks = [
+            'overdue' => [],
+            'this_week' => [],
+            'next_week' => [],
+            'this_month' => [],
+            'later' => [],
+            'none' => [],
         ];
 
         foreach ($tasks as $task) {
             $key = self::keyFor($task, $now, $endOfWeek, $endNextWeek, $endOfMonth);
-            $buckets[$key]['tasks']->push($task);
+            $bucketTasks[$key][] = $task;
         }
 
-        foreach ($buckets as $key => $bucket) {
-            $buckets[$key]['tasks'] = $bucket['tasks']
+        $grouped = [];
+
+        foreach ($bucketTasks as $key => $taskList) {
+            if ($taskList === []) {
+                continue;
+            }
+
+            $sorted = (new Collection($taskList))
                 ->sortBy(fn (Task $task) => [
                     $task->isCompleted() ? 1 : 0,
-                    $task->due_date?->timestamp ?? PHP_INT_MAX,
+                    $task->due_date === null ? PHP_INT_MAX : $task->due_date->getTimestamp(),
                     $task->sort_order,
                     $task->id,
                 ])
                 ->values();
+
+            $grouped[] = [
+                'key' => $key,
+                'title' => $meta[$key]['title'],
+                'tone' => $meta[$key]['tone'],
+                'tasks' => $sorted,
+            ];
         }
 
-        return collect($buckets)
-            ->map(fn (array $bucket, string $key) => [
-                'key' => $key,
-                'title' => $bucket['title'],
-                'tone' => $bucket['tone'],
-                'tasks' => $bucket['tasks'],
-            ])
-            ->filter(fn (array $bucket) => $bucket['tasks']->isNotEmpty())
-            ->values()
-            ->all();
+        return $grouped;
     }
 
     public static function keyFor(

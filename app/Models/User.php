@@ -80,21 +80,25 @@ class User extends Authenticatable implements PasskeyUser
         return 'neutral';
     }
 
+    /** @return HasMany<Task, $this> */
     public function assignedTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'assigned_to');
     }
 
+    /** @return HasMany<Task, $this> */
     public function completedTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'completed_by');
     }
 
+    /** @return HasMany<Rating, $this> */
     public function givenRatings(): HasMany
     {
         return $this->hasMany(Rating::class, 'rater_id');
     }
 
+    /** @return HasMany<Rating, $this> */
     public function receivedRatings(): HasMany
     {
         return $this->hasMany(Rating::class, 'ratee_id');

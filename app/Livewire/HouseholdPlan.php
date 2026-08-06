@@ -16,6 +16,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
+/**
+ * @property-read Collection<int, User> $users
+ * @property-read Collection<int, array{key: string, title: string, tone: string, tasks: Collection<int, Task>, done: int, total: int}> $groups
+ * @property-read array{done: int, total: int} $totals
+ * @property-read Task|null $ratingTask
+ * @property-read User|null $ratingRatee
+ */
 #[Layout('layouts::plan')]
 #[Title('Opravko')]
 class HouseholdPlan extends Component
@@ -236,8 +243,8 @@ class HouseholdPlan extends Component
         $this->showCreateForm = false;
         $this->editingTaskId = null;
         $this->ratingTaskId = $task->id;
-        $this->ratingScore = $existing?->score ?? 5;
-        $this->ratingNote = $existing?->note ?? '';
+        $this->ratingScore = $existing !== null ? $existing->score : 5;
+        $this->ratingNote = $existing !== null ? ($existing->note ?? '') : '';
         $this->resetValidation();
     }
 
@@ -279,12 +286,18 @@ class HouseholdPlan extends Component
         unset($this->groups, $this->totals);
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     #[Computed]
     public function users(): Collection
     {
         return User::query()->orderBy('name')->get();
     }
 
+    /**
+     * @return Collection<int, array{key: string, title: string, tone: string, tasks: Collection<int, Task>, done: int, total: int}>
+     */
     #[Computed]
     public function groups(): Collection
     {
@@ -319,6 +332,9 @@ class HouseholdPlan extends Component
         });
     }
 
+    /**
+     * @return array{done: int, total: int}
+     */
     #[Computed]
     public function totals(): array
     {
@@ -352,7 +368,7 @@ class HouseholdPlan extends Component
         return $task->rateeFor(Auth::user());
     }
 
-    public function render()
+    public function render(): mixed
     {
         return view('livewire.household-plan');
     }
