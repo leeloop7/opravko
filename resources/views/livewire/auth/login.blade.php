@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Log in')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+        <x-auth-header :title="__('Prijava')" :description="__('Vpiši se in nadaljuj s skupnimi opravili.')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -57,7 +57,7 @@
                 <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
             </div>
         @else
-            <p class="text-sm text-center text-zinc-600 dark:text-zinc-400">
+            <p class="text-sm text-center" style="color: var(--op-faint)">
                 Leon: leon@opravko.local · Katja: katja@opravko.local
             </p>
         @endif

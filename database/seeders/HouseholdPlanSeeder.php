@@ -102,16 +102,18 @@ class HouseholdPlanSeeder extends Seeder
                 $groupData,
             );
 
-            foreach (array_values($tasks) as $index => $taskData) {
+            foreach ($tasks as $index => $taskData) {
                 $assignee = isset($taskData['assigned']) ? $users[$taskData['assigned']] : null;
                 $completer = isset($taskData['by']) ? $users[$taskData['by']] : null;
                 $done = (bool) ($taskData['done'] ?? false);
 
-                Task::query()->updateOrCreate(
+                // firstOrCreate: ne prepiši assignee/completed stanja, ki ga uporabnika že spremenita.
+                Task::query()->firstOrCreate(
                     ['slug' => $taskData['slug']],
                     [
                         'task_group_id' => $group->id,
                         'title' => $taskData['title'],
+                        'due_date' => $groupData['due_date'],
                         'assigned_to' => $assignee?->id,
                         'created_by' => $leon->id,
                         'completed_by' => $done ? $completer?->id : null,

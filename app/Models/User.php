@@ -61,21 +61,44 @@ class User extends Authenticatable implements PasskeyUser
             : $initials;
     }
 
+    /**
+     * Visual accent for task coloring (leon | katja | neutral).
+     */
+    public function accent(): string
+    {
+        $name = Str::lower($this->name);
+        $email = Str::lower($this->email);
+
+        if ($name === 'leon' || str_contains($email, 'leon@')) {
+            return 'leon';
+        }
+
+        if ($name === 'katja' || str_contains($email, 'katja@')) {
+            return 'katja';
+        }
+
+        return 'neutral';
+    }
+
+    /** @return HasMany<Task, $this> */
     public function assignedTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'assigned_to');
     }
 
+    /** @return HasMany<Task, $this> */
     public function completedTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'completed_by');
     }
 
+    /** @return HasMany<Rating, $this> */
     public function givenRatings(): HasMany
     {
         return $this->hasMany(Rating::class, 'rater_id');
     }
 
+    /** @return HasMany<Rating, $this> */
     public function receivedRatings(): HasMany
     {
         return $this->hasMany(Rating::class, 'ratee_id');

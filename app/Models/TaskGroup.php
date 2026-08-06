@@ -31,6 +31,7 @@ class TaskGroup extends Model
         ];
     }
 
+    /** @return HasMany<Task, $this> */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class)->orderBy('sort_order');
