@@ -108,7 +108,7 @@ class HouseholdPlanSeeder extends Seeder
             );
 
             foreach ($tasks as $index => $taskData) {
-                $assignee = isset($taskData['assigned']) ? $users[$taskData['assigned']] : null;
+                $assignee = $users[$taskData['assigned']];
                 $completer = isset($taskData['by']) ? $users[$taskData['by']] : null;
                 $done = (bool) ($taskData['done'] ?? false);
 
@@ -117,7 +117,7 @@ class HouseholdPlanSeeder extends Seeder
                     'task_group_id' => $group->id,
                     'title' => $taskData['title'],
                     'due_date' => $groupData['due_date'],
-                    'assigned_to' => $assignee?->id,
+                    'assigned_to' => $assignee->id,
                     'created_by' => $leon->id,
                     'completed_by' => $done ? $completer?->id : null,
                     'completed_at' => $done ? now()->subDays(3) : null,
